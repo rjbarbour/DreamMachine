@@ -31,9 +31,14 @@ The page in the brief (`izhikevich_blue_brain_page`) covers three things:
 
 1. The simple spiking neuron model.
 2. A 10^11-neuron, ~10^15-synapse thalamocortical simulation finished in October
-   2005, where one second of model time took 50 days on 27 processors.
+   2005, where one second of model time took 50 days on 27 processors. This run has
+   no paper of its own. Synapses were not stored: the anatomy was regenerated every
+   1 ms step (`izhikevich_why_page`). The cortical wiring data it cites is
+   `binzegger2004_cat_v1_circuit`.
 3. The 2008 large-scale model, with multi-compartment neurons, 21 firing types,
    short-term plasticity, dendritic STDP and dopamine modulation of plasticity.
+   Its paper is Izhikevich & Edelman, PNAS 105:3593–3598
+   (`izhikevich2008_thalamocortical_page`; abstract page read, paper not yet opened).
 
 None of these is a small runnable program. The runnable "Izhikevich STDP model" is
 `spnet` from the 2006 polychronization paper (`izhikevich2006_polychronization_page`),
