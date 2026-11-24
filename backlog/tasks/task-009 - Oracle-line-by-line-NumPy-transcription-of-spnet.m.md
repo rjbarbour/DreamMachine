@@ -1,9 +1,10 @@
 ---
 id: TASK-009
 title: 'Oracle: line-by-line NumPy transcription of spnet.m'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-24T00:20:24Z'
+updated_date: '2026-11-24T00:55:55Z'
 labels:
   - correctness
 milestone: m-1
@@ -22,6 +23,12 @@ We need an implementation that is obviously correct before we write one that is 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Connectivity, delays and the thalamic input sequence can be supplied from outside so runs are comparable across implementations
-- [ ] #2 Every deviation from spnet.m (for example the random number generator) is listed in the module docstring
+- [x] #1 Connectivity, delays and the thalamic input sequence can be supplied from outside so runs are comparable across implementations
+- [x] #2 Every deviation from spnet.m (for example the random number generator) is listed in the module docstring
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+dreammachine.spnet.oracle.run_oracle transcribes the spnet.m loop (commit 237d113). Connectivity, delays and the input sequence are supplied by the caller. Deviations are listed in the module docstring. Reviewed line by line against spnet.m by the main session; not yet compared with a run of the original (TASK-010).
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -1,9 +1,10 @@
 ---
 id: TASK-011
 title: Reference network builder (800 RS + 200 FS, fixed fan-out, delays)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-11-24T00:20:25Z'
+updated_date: '2026-11-24T00:55:55Z'
 labels:
   - correctness
 milestone: m-1
@@ -21,5 +22,11 @@ The current builder makes a single all-excitatory population with random sparse 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 Builder output satisfies each structural property above, checked by property-based tests
-- [ ] #2 Fan-out, population sizes and delay range are parameters so the same builder serves the scaling study
+- [x] #2 Fan-out, population sizes and delay range are parameters so the same builder serves the scaling study
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+dreammachine.spnet.network.build_network and make_inputs (commit 237d113). Structural properties are checked by example-based tests in tests/test_spnet_network.py; sizes are parameters. Not done as specified: the first acceptance criterion asks for property-based tests (hypothesis) and the tests are example-based, so that criterion is left unchecked.
+<!-- SECTION:FINAL_SUMMARY:END -->
