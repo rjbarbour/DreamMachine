@@ -99,6 +99,7 @@ this size a GPU is limited by per-step overhead.
 |------|------------|
 | The original MATLAB and C++ programs are not equivalent, and the published code differs from the paper | Pick one as the reference explicitly (TASK-010) and follow the published replication study's findings |
 | Network activity is chaotic: tiny numerical differences diverge | Exact comparison only against our own transcription with identical arithmetic; statistical comparison against everything else |
+| The model's headline result may depend on its coarse integration: the techniques survey reports, citing Pauli et al. 2018, that polychronous group counts fell from about 4,300 to 151 at a 0.1 ms step | Keep an original-faithful mode and a separately named accurate mode; measure which results survive (TASK-025) before M3 and M4 build on the neuron update |
 | Aplysia validation data may be sparse or only in figures | M4 tasks record the source and extraction method for every target; where no number exists the comparison is qualitative and labelled so |
 | Benchmarks on a shared cloud VM are noisy and do not transfer to the M1 | Repeated runs recorded with machine details; M1 runs recorded separately (TASK-018) |
 | Scope creep toward a general simulator | Mature simulators already exist; this project implements only what its milestones need |
@@ -114,3 +115,57 @@ this size a GPU is limited by per-step overhead.
 
 M0 and M1 are machine-independent and fine to do in the cloud. M2 timings must also
 be taken on the M1.
+
+## 7. Prior art in brief
+
+Three searches were run on 2026-11-24. The full reports are in `references/notes/`
+and were compiled by research sub-agents; they have not been re-read by a second
+reader, and many papers were read as abstracts only. Manifest records marked
+`opened: false` are leads, not evidence.
+
+**Replications of `spnet`** (`notes/2026-11-24-spnet-replications-and-simulators.md`)
+
+- A dedicated replication study exists (`pauli2018_reproducing`) with open code
+  (`inm6_reproducing_polychronization`, MIT), and a second study supplies a
+  statistical comparison method and a C implementation (`trensch2018_rigorous`,
+  `trensch_rigorous_repo`, GPL-2.0). Both are reported to find the original code
+  inconsistent with the paper and numerically fragile. M1 uses them as cross-checks.
+- No Numba or Julia port and no official Brian2 or NEST example was found.
+
+**Simulators and speed** (same note)
+
+- Mature simulators cover Izhikevich neurons, STDP and delays (Brian2, GeNN, NEST
+  GPU, CARLsim). None is a good fit as a dependency for the core: the report notes
+  restrictions on per-synapse delays in the GPU back ends. Brian2 is a candidate
+  independent cross-check.
+- The nearest published speed figure is 62–72x realtime on a desktop GPU for a
+  similar 1000-neuron network (`knight2021_pygenn`). No single-core figure for
+  `spnet` was found, and nothing credible on Apple Silicon GPUs.
+
+**Efficient-simulation techniques** (`notes/2026-11-24-virtual-organisms-and-simulation-techniques.md`)
+
+- For a network this size: a fixed-step loop, a ring buffer for delays, and synapses
+  in contiguous source-sorted arrays (`brette2007_review`, `pronold2022_parallel_sorting`).
+- Two STDP bookkeeping options to compare in TASK-012: an incoming-synapse index
+  (GeNN) or deferring the update to the next presynaptic spike (SpiNNaker,
+  `knight2016_synapse_centric`).
+- Procedural connectivity and exascale layouts are for 10^6 neurons and up: out of scope.
+
+**Virtual organisms** (same note)
+
+- **No virtual Aplysia was found**: no whole-animal simulation, no connectome, no
+  whole-nervous-system cell atlas. The closest work is the Aplysia feeding
+  neuromechanical models (`websterwood2020_boolean_feeding`,
+  `bennington2025_feeding_model`: about 20 Boolean neurons with a body, no learning)
+  and a 13-cell feeding-circuit model with reward plasticity
+  (`costa2020_feeding_cpg_model`, no body).
+- Projects worth imitating: the FlyWire whole-brain model for validation practice
+  (a table of predictions against experiments, with limitations stated,
+  `shiu2024_flywire_lif`), OpenWorm for packaging, BAAIWorm for closing the loop
+  between nervous system and body.
+- Open question: the neuron count of Aplysia. The figure of about 20,000 given
+  earlier in this project came from memory, and the survey's 8,000–10,000 comes
+  from an unopened search snippet (`katz2010_neuronbank`). Neither is sourced yet.
+
+**Aplysia learning models** — search still running when this section was written;
+M4 tasks are created from its report.

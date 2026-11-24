@@ -4,7 +4,7 @@ title: Simulation kernel with conduction delays and spnet STDP
 status: To Do
 assignee: []
 created_date: '2026-11-24T00:20:25Z'
-updated_date: '2026-11-24T00:24:51Z'
+updated_date: '2026-11-24T00:35:41Z'
 labels:
   - correctness
 milestone: m-1
@@ -14,6 +14,7 @@ dependencies:
 references:
   - references/notes/2026-11-24-spnet-replications-and-simulators.md
   - https://pmc.ncbi.nlm.nih.gov/articles/PMC6299048/
+  - references/notes/2026-11-24-virtual-organisms-and-simulation-techniques.md
 priority: high
 ordinal: 12000
 ---
@@ -35,4 +36,6 @@ This replaces the current simulator loop for the reference model. It must reprod
 
 <!-- SECTION:NOTES:BEGIN -->
 Layout to consider (from GeNN, Knight and Nowotny 2018, per the prior-art note): [N, fan-out] arrays for target, weight and delay with rows sorted by delay, a ring buffer of max-delay slots for delivery, and a column-major incoming index for potentiation on postsynaptic spikes.
+
+Second layout option from the techniques survey (same date): keep synapses only in source-sorted contiguous arrays, deliver into a per-neuron ring buffer of summed input (as NEST does, per Pronold et al. 2022), and defer the potentiation update until the next presynaptic spike arrives using a short postsynaptic spike history (the SpiNNaker scheme, Knight and Furber 2016). This avoids the incoming-synapse index. Compare both options before fixing the layout; note that spnet applies potentiation at the postsynaptic spike, so a deferred scheme must be shown to give identical weights at the once-per-second update.
 <!-- SECTION:NOTES:END -->

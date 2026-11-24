@@ -4,11 +4,14 @@ title: Scaling study and memory model
 status: To Do
 assignee: []
 created_date: '2026-11-24T00:20:27Z'
+updated_date: '2026-11-24T00:35:41Z'
 labels:
   - perf
 milestone: m-2
 dependencies:
   - TASK-015
+references:
+  - references/notes/2026-11-24-virtual-organisms-and-simulation-techniques.md
 priority: medium
 ordinal: 16000
 ---
@@ -25,3 +28,9 @@ Scalable has to be shown, not asserted. The earlier README claimed linear scalin
 - [ ] #2 Bytes per synapse and per neuron are stated and agree with measured memory
 - [ ] #3 The network size at which the kernel drops below realtime is reported for each machine tested
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Out of scope per the techniques survey: procedural connectivity (Knight and Nowotny 2021) and the NEST exascale layouts target 10^6 neurons and above.
+<!-- SECTION:NOTES:END -->
