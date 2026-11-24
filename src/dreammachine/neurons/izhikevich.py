@@ -90,7 +90,7 @@ class NeuronParams:
 
 
 # JIT-compiled core update function for maximum performance
-@jit(nopython=True, parallel=True, cache=True, fastmath=True)
+@jit(nopython=True, parallel=True, cache=True, fastmath=False)
 def _step_numba(
     v: NDArray[np.float32],
     u: NDArray[np.float32],
@@ -110,27 +110,35 @@ def _step_numba(
     n = len(v)
     spikes = np.zeros(n, dtype=np.bool_)
 
+    # All arithmetic is done in float32, mirroring _step_numpy. Bare Python
+    # float literals/arguments are float64 in Numba and would silently promote
+    # every intermediate to double precision, so cast them explicitly.
+    f32 = np.float32
+    k04 = f32(0.04)
+    k5 = f32(5.0)
+    k140 = f32(140.0)
+    half_dt = f32(dt / 2.0)
+    dt32 = f32(dt)
+    thresh = f32(v_thresh)
+
     for i in prange(n):
-        # Two half-steps for numerical stability (Izhikevich recommendation)
         v_i = v[i]
         u_i = u[i]
         I_i = I[i]
         a_i = a[i]
         b_i = b[i]
 
-        # First half-step
-        dv = 0.04 * v_i * v_i + 5.0 * v_i + 140.0 - u_i + I_i
-        v_i += (dt / 2.0) * dv
-
-        # Second half-step
-        dv = 0.04 * v_i * v_i + 5.0 * v_i + 140.0 - u_i + I_i
-        v_i += (dt / 2.0) * dv
+        # Two half-steps (same operation order as _step_numpy)
+        dv = k04 * (v_i * v_i) + k5 * v_i + k140 - u_i + I_i
+        v_i = v_i + half_dt * dv
+        dv = k04 * (v_i * v_i) + k5 * v_i + k140 - u_i + I_i
+        v_i = v_i + half_dt * dv
 
         # Recovery variable update
-        u_i += dt * a_i * (b_i * v_i - u_i)
+        u_i = u_i + dt32 * a_i * (b_i * v_i - u_i)
 
         # Spike detection and reset
-        if v_i >= v_thresh:
+        if v_i >= thresh:
             spikes[i] = True
             v[i] = c[i]
             u[i] = u_i + d[i]
@@ -252,6 +260,8 @@ class IzhikevichPopulation:
     def _step_numpy(self, dt: float) -> NDArray[np.bool_]:
         """Pure NumPy implementation (fallback when Numba unavailable)."""
         # Two half-steps for stability
+        # Python-float scalars are weak under NumPy 2 promotion, so everything
+        # stays float32.
         dv = 0.04 * self.v**2 + 5.0 * self.v + 140.0 - self.u + self.I
         self.v += (dt / 2.0) * dv
         dv = 0.04 * self.v**2 + 5.0 * self.v + 140.0 - self.u + self.I

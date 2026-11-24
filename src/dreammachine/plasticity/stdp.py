@@ -170,6 +170,38 @@ class STDPSynapses:
                 (n_pre, n_post), dtype=np.float32
             )
 
+        # Weights must already lie within [w_min, w_max]; otherwise the first
+        # plasticity event would silently clamp them to a bound. Compare in
+        # float32 (storage precision) so a weight stored exactly at a bound
+        # is accepted.
+        if self.weights.nnz > 0:
+            lo = np.float32(self.params.w_min)
+            hi = np.float32(self.params.w_max)
+            data = self.weights.data
+            if np.any(data < lo) or np.any(data > hi) or not np.all(np.isfinite(data)):
+                raise ValueError(
+                    f"Initial weights must lie within [w_min={self.params.w_min}, "
+                    f"w_max={self.params.w_max}], but found values in "
+                    f"[{float(data.min())}, {float(data.max())}]. Pass STDPParams "
+                    f"with bounds matching the weight scale."
+                )
+
+        # Weights must already lie within [w_min, w_max]; otherwise the first
+        # plasticity event would silently clamp them to a bound. Compare in
+        # float32 (storage precision) so a weight stored exactly at a bound
+        # is accepted.
+        if self.weights.nnz > 0:
+            lo = np.float32(self.params.w_min)
+            hi = np.float32(self.params.w_max)
+            data = self.weights.data
+            if not np.all(np.isfinite(data)) or np.any(data < lo) or np.any(data > hi):
+                raise ValueError(
+                    f"Initial weights must lie within [w_min={self.params.w_min}, "
+                    f"w_max={self.params.w_max}], but found values in "
+                    f"[{float(data.min())}, {float(data.max())}]. Pass STDPParams "
+                    f"with bounds matching the weight scale."
+                )
+
         # Transpose for efficient post->pre lookups
         self._weights_csc = self.weights.tocsc()
 

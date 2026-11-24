@@ -67,7 +67,9 @@ class TestNetworkSimulator:
         """Create small test network."""
         neurons = IzhikevichPopulation(10, NeuronType.RS)
         conn = create_random_connectivity(10, 10, density=0.2, w_init=5.0)
-        synapses = STDPSynapses(10, 10, connectivity=conn)
+        synapses = STDPSynapses(
+            10, 10, connectivity=conn, params=STDPParams(w_max=10.0)
+        )
         return NetworkSimulator(neurons, synapses)
 
     def test_run_completes(self, simple_network):
@@ -205,6 +207,7 @@ class TestIntegration:
             neuron_type=NeuronType.RS,
             connectivity_density=0.1,
             w_init=10.0,
+            stdp_params=STDPParams(w_min=0.0, w_max=20.0),
             heterogeneous=True,
             rng=rng,
         )

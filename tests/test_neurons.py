@@ -137,11 +137,9 @@ class TestIzhikevichPopulation:
         """Homogeneous populations have identical parameters."""
         pop = IzhikevichPopulation(100, NeuronType.RS, heterogeneous=False)
 
-        # All parameters should be identical (std ~= 0, allowing float32 precision)
-        assert pop.a.std() < 1e-6, "Parameters should be identical"
-        assert pop.b.std() < 1e-6
-        assert pop.c.std() < 1e-6
-        assert pop.d.std() < 1e-6
+        # np.full fills a single value, so every element must be exactly equal
+        for arr in (pop.a, pop.b, pop.c, pop.d):
+            assert np.all(arr == arr[0]), "Parameters should be identical"
 
     def test_reset(self):
         """Reset returns neurons to initial state."""
@@ -219,26 +217,23 @@ class TestNumpyNumbaEquivalence:
     """Verify NumPy and Numba implementations produce same results."""
 
     def test_step_equivalence(self):
-        """NumPy and Numba produce identical results."""
-        rng = np.random.default_rng(42)
+        """NumPy and Numba paths agree exactly.
 
-        # Create two identical populations
-        pop_np = IzhikevichPopulation(100, NeuronType.RS, rng=rng)
+        Both compute in float32 with the same operation order and the Numba
+        kernel has fastmath off, so IEEE-754 float32 results are bit-identical.
+        """
+        pop_np = IzhikevichPopulation(100, NeuronType.RS, rng=np.random.default_rng(42))
         pop_nb = IzhikevichPopulation(100, NeuronType.RS, rng=np.random.default_rng(42))
-
-        # Force NumPy path
         pop_np._use_numba = False
 
-        # Set same input
-        I = rng.uniform(5, 15, 100).astype(np.float32)
+        I = np.random.default_rng(7).uniform(5, 15, 100).astype(np.float32)
         pop_np.I[:] = I
-        pop_nb.I[:] = I.copy()
+        pop_nb.I[:] = I
 
-        # Run several steps
         for _ in range(100):
             spikes_np = pop_np._step_numpy(0.5)
             spikes_nb = pop_nb.step(0.5)
 
-            # Results should match closely (rtol=1e-3 for float32 with fastmath/parallel)
-            assert np.allclose(pop_np.v, pop_nb.v, rtol=1e-3, atol=0.01)
-            assert np.allclose(pop_np.u, pop_nb.u, rtol=1e-3, atol=0.01)
+            assert np.array_equal(spikes_np, spikes_nb)
+            assert np.array_equal(pop_np.v, pop_nb.v)
+            assert np.array_equal(pop_np.u, pop_nb.u)

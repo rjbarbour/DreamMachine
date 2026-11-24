@@ -70,6 +70,27 @@ class TestSTDPSynapses:
         assert syn.weights.nnz == conn.nnz
         assert np.allclose(syn.weights.data, 0.5)
 
+    def test_out_of_range_weights_raise(self):
+        """Weights above w_max or below w_min are rejected at construction."""
+        conn = sparse.csr_matrix(([15.0], ([0], [1])), shape=(2, 2), dtype=np.float32)
+        with pytest.raises(ValueError, match="w_max"):
+            STDPSynapses(2, 2, connectivity=conn)  # default w_max=1.0
+        neg = sparse.csr_matrix(([-0.1], ([0], [1])), shape=(2, 2), dtype=np.float32)
+        with pytest.raises(ValueError, match="w_min"):
+            STDPSynapses(2, 2, connectivity=neg)
+
+    def test_in_range_weights_accepted(self):
+        """Weights inside [w_min, w_max], including the bounds, are accepted."""
+        conn = sparse.csr_matrix(
+            ([0.0, 15.0, 30.0], ([0, 0, 1], [0, 1, 1])), shape=(2, 2), dtype=np.float32
+        )
+        syn = STDPSynapses(2, 2, connectivity=conn,
+                           params=STDPParams(w_min=0.0, w_max=30.0))
+        assert syn.weights.nnz == 3
+        # A bound not exactly representable in float32 is still accepted
+        conn = sparse.csr_matrix(([0.3], ([0], [1])), shape=(2, 2), dtype=np.float32)
+        STDPSynapses(2, 2, connectivity=conn, params=STDPParams(w_max=0.3))
+
     def test_traces_initial_zero(self):
         """Eligibility traces start at zero."""
         syn = STDPSynapses(100, 100)

@@ -45,11 +45,15 @@ def run_basic_example():
         neuron_type=NeuronType.RS,
         connectivity_density=0.1,
         w_init=15.0,  # Strong initial weights for visible activity
+        # Weight scale ~15: bounds and learning amplitudes (~1% of w_init per
+        # pairing) must match it, since STDPSynapses requires w in [w_min, w_max].
         stdp_params=STDPParams(
             tau_plus=20.0,
             tau_minus=20.0,
-            A_plus=0.01,
-            A_minus=-0.012,
+            A_plus=0.15,
+            A_minus=-0.18,
+            w_min=0.0,
+            w_max=30.0,
         ),
         heterogeneous=True,
         rng=rng,
@@ -94,7 +98,8 @@ def run_basic_example():
     final_stats = synapses.get_weight_stats()
     print(f"\nFinal weights: mean={final_stats['mean']:.3f}, "
           f"std={final_stats['std']:.3f}")
-    print(f"Weight change: {final_stats['mean'] - initial_stats['mean']:+.3f}")
+    print(f"Mean weight change: {final_stats['mean'] - initial_stats['mean']:+.3f} "
+          f"(bounds [0, 30])")
 
     return result
 
