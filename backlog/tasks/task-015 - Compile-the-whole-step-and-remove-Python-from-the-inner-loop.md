@@ -4,7 +4,7 @@ title: Compile the whole step and remove Python from the inner loop
 status: To Do
 assignee: []
 created_date: '2026-11-24T00:20:27Z'
-updated_date: '2026-11-24T00:24:51Z'
+updated_date: '2026-11-24T01:07:22Z'
 labels:
   - perf
 milestone: m-2
@@ -33,4 +33,6 @@ Measured baseline of the current simulator on 2026-11-24: 1000 neurons and 100k 
 
 <!-- SECTION:NOTES:BEGIN -->
 Published comparison point (per the prior-art note): PyGeNN 2021 reports 62-72x realtime on a desktop GPU for an 800+200 Izhikevich network with dopamine-modulated STDP. No published single-core figure for spnet was found.
+
+2026-11-24 measured (scripts/bench.py, record bench-spnet-reference-20261124T010156Z.json): reference network 10 s model time in 0.111-0.123 s over 7 repeats after warm-up, 81.5-89.9x realtime on one thread (kernel is serial), above the provisional 20x target. No before/after profile of the kernel was recorded, so criteria 1 and 3 are not checked; the kernel as written is already compiled end to end.
 <!-- SECTION:NOTES:END -->

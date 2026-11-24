@@ -1,10 +1,10 @@
 ---
 id: TASK-012
 title: Simulation kernel with conduction delays and spnet STDP
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-11-24T00:20:25Z'
-updated_date: '2026-11-24T00:55:55Z'
+updated_date: '2026-11-24T01:07:22Z'
 labels:
   - correctness
 milestone: m-1
@@ -29,7 +29,7 @@ This replaces the current simulator loop for the reference model. It must reprod
 <!-- AC:BEGIN -->
 - [x] #1 Spike trains and final weights match the oracle exactly for the same seed over at least 10 s of model time
 - [x] #2 Inhibitory weights never change and excitatory weights stay within [0, 10], checked by tests
-- [ ] #3 The architecture document describes the data layout and the step order
+- [x] #3 The architecture document describes the data layout and the step order
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -41,3 +41,9 @@ Second layout option from the techniques survey (same date): keep synapses only 
 
 2026-11-24: run_kernel (Numba, float64, fastmath off) matches the oracle exactly (np.array_equal on spikes, s, sd, v, u) for a small network over 3 s and the default network over 2 s; inhibitory weights unchanged and excitatory weights within [0, 10] are tested. Measured by the main session: 10 s of model time in 0.109-0.111 s over three runs on the 4-vCPU cloud container, about 90x realtime. Remaining: the architecture document does not yet describe the layout and step order. The kernel walks the global spike list backwards instead of using a ring buffer and cannot resume from a saved state.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+docs/architecture.md now describes the spnet data layout and step order and marks the prototype modules as legacy. Reference network: 81.5-89.9x realtime over 7 repeats (docs/validation/benchmarks.md). Kernel uses a backward scan of the spike list, not a ring buffer, and cannot resume from saved state.
+<!-- SECTION:FINAL_SUMMARY:END -->
