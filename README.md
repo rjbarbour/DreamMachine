@@ -1,16 +1,22 @@
 # DreamMachine
 
-**High-performance spiking neural network simulator with Izhikevich neurons and STDP plasticity**
+**Spiking neural network simulator with Izhikevich neurons and STDP plasticity (early prototype)**
 
-A biomimetic SNN framework designed for computational neuroscience research, Hebbian learning experiments, and as groundwork for simulating biological neural circuits like *Aplysia californica*.
+A biomimetic SNN framework intended for computational neuroscience research, Hebbian learning experiments, and as groundwork for simulating biological neural circuits like *Aplysia californica*.
+
+> **Status: prototype.** The current code runs and is tested, but it does not yet
+> replicate Izhikevich's reference network (no conduction delays, no inhibitory
+> population) and it is not yet fast. See [docs/plan.md](docs/plan.md) for the audit,
+> the revised milestones and the measured baseline. Work is tracked in `backlog/`
+> ([Backlog.md](https://backlog.md), run `backlog board`).
 
 ## Features
 
-- **Izhikevich Neuron Model**: Efficient 2-variable model reproducing 20+ firing patterns
-- **STDP Plasticity**: Trace-based spike-timing-dependent plasticity with O(1) complexity per spike
-- **Vectorized Computation**: NumPy + Numba JIT for near-native performance
-- **Sparse Connectivity**: Memory-efficient CSR matrices for large-scale networks
-- **Modular Architecture**: Extensible design for custom neuron and plasticity models
+- **Izhikevich Neuron Model**: 2-variable model with seven preset neuron types
+- **STDP Plasticity**: Trace-based pair STDP with weight bounds
+- **Computation**: NumPy, with the neuron update compiled by Numba (the plasticity and simulation loops are still Python)
+- **Sparse Connectivity**: CSR weight matrix
+- **Modular layout**: separate neuron, plasticity and simulator modules
 
 ## Installation
 
@@ -92,15 +98,16 @@ params = STDPParams(
 
 ## Performance
 
-Benchmark on typical hardware (Intel i7, 16GB RAM):
+Measured on 2026-11-24 in a 4-vCPU cloud container (Intel Xeon 2.1 GHz, 15 GB RAM),
+Python 3.13, Numba 0.68, `dt = 0.5 ms`, no conduction delays:
 
-| Network Size | Synapses | 100ms Simulation | Realtime Factor |
-|--------------|----------|------------------|-----------------|
-| 100 neurons  | 1,000    | ~5ms            | 20x             |
-| 1,000 neurons| 10,000   | ~50ms           | 2x              |
-| 10,000 neurons| 100,000 | ~500ms          | 0.2x            |
+| Network size | Synapses | Model time | Wall time | Realtime factor |
+|--------------|----------|------------|-----------|-----------------|
+| 1,000 neurons | 100,000 | 1.0 s | 4.4 s | 0.23x |
 
-Performance scales linearly with neuron count and synapse count.
+This is a single unrepeated run, recorded as the baseline to improve on. An earlier
+version of this table contained estimates that had not been measured; they have been
+removed. The performance target and method are in [docs/plan.md](docs/plan.md).
 
 ## Project Structure
 
@@ -125,10 +132,10 @@ pytest tests/ -v
 
 ## Roadmap
 
-1. **Phase 1** (Current): Core Izhikevich + STDP
-2. **Phase 2**: GPU acceleration (CuPy/CUDA)
-3. **Phase 3**: Aplysia gill-withdrawal circuit model
-4. **Phase 4**: Kandel's learning experiments *in silico*
+See [docs/plan.md](docs/plan.md). In short: replicate Izhikevich's reference network
+correctly first, then make it fast on CPU, then add the plasticity rules that
+Aplysia learning needs, then the Aplysia reflex circuit. GPU work is deferred until
+a measured need exists.
 
 ## References
 

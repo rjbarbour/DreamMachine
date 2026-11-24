@@ -77,7 +77,7 @@ def run_basic_example():
     result = sim.run(duration_ms, dt=dt, I_ext=external_input)
 
     elapsed = time.perf_counter() - start
-    print(f"Completed in {elapsed:.2f}s ({duration_ms/elapsed:.1f}x realtime)")
+    print(f"Completed in {elapsed:.2f}s ({duration_ms / 1000.0 / elapsed:.1f}x realtime)")
 
     # Results
     print(f"\nResults:")

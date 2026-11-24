@@ -59,3 +59,6 @@ Thumbs.db
 *.npz
 output/
 results/
+
+# Raw copies of cited sources (copyrighted; rebuilt by scripts/refs.py fetch)
+references/cache/
