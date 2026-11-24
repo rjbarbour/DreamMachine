@@ -168,9 +168,25 @@ reader, and many papers were read as abstracts only. Manifest records marked
   (a table of predictions against experiments, with limitations stated,
   `shiu2024_flywire_lif`), OpenWorm for packaging, BAAIWorm for closing the loop
   between nervous system and body.
-- Open question: the neuron count of Aplysia. The figure of about 20,000 given
-  earlier in this project came from memory, and the survey's 8,000–10,000 comes
-  from an unopened search snippet (`katz2010_neuronbank`). Neither is sourced yet.
+- Neuron count of Aplysia: a review states about 10,000 neurons, with the withdrawal circuits using tens to hundreds
+  (`byrne2015_nonassociative`, text read). The earlier figure of about 20,000 came from memory and is withdrawn. No
+  abdominal-ganglion count was found in an opened source.
 
-**Aplysia learning models** — search still running when this section was written;
-M4 tasks are created from its report.
+**Aplysia learning models** (`notes/2026-11-24-aplysia-withdrawal-reflex-models.md`)
+
+- Models exist at three levels: single-synapse release and cAMP models (`gingrich1985_simulation`,
+  `gingrich1987_associative`), an integrate-and-fire circuit without learning (`lieb1997_siphon_circuit`), and ODE
+  cascade models of long-term facilitation (`pettigrew2005_motifs`, `zhang2021_kinases`). Code was found only for
+  `zhou2014_modeldb` (ModelDB 152200) and the SNNAP Java simulator (`snnap_page`, download not tested). No
+  withdrawal-reflex learning model after 2018 was found beyond the 2021 cascade model.
+- Minimal circuit: LE sensory cells (about five per tap) onto LFS motor cells; the monosynaptic path carries about
+  one-third of the reflex (`antonov1999_monosynaptic`); L29 and L30 interneurons shape the output. The 1997 model found
+  L29-L30 coupling had little effect.
+- Mechanisms: habituation is presynaptic depression (`castellucci1974_quantal`); sensitization and dishabituation are
+  modulator-driven facilitation (`byrne2015_nonassociative`, `antonov2010_itm`); conditioning needs presynaptic
+  activity paired with the US about 0.5 s later (`hawkins1986_isi`) plus a postsynaptic NMDA term
+  (`murphy1997_ltp`, `antonov2003_neuron`).
+- **Pair-based STDP is not the right rule for these.** Short-term plasticity and a neuromodulator-gated three-factor
+  rule are required; this confirms principle 4 and the M3 scope. No source measured a pre/post timing window at these
+  synapses.
+- Many validation numbers are only in figures. M4 tasks (TASK-026 to TASK-030) record text or figure for each target.
