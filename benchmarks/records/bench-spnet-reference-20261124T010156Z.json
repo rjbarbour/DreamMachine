@@ -1,0 +1,61 @@
+{
+  "benchmark": "spnet-reference",
+  "git_sha": "1fe8330ea40c159ff896133c0286ce3fbcd3938d",
+  "utc_time": "2026-11-24T01:01:56Z",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_count": 4,
+  "numba_threads": 4,
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "numba": "0.68.1",
+  "parameters": {
+    "spnet_params": {
+      "Ne": 800,
+      "Ni": 200,
+      "M": 100,
+      "D": 20,
+      "sm": 10.0,
+      "w_exc": 6.0,
+      "w_inh": -5.0,
+      "a_exc": 0.02,
+      "d_exc": 8.0,
+      "a_inh": 0.1,
+      "d_inh": 2.0,
+      "b": 0.2,
+      "c": -65.0,
+      "input_current": 20.0,
+      "trace_amp": 0.1,
+      "ltd_factor": 1.2,
+      "trace_decay": 0.95,
+      "sd_decay": 0.9,
+      "w_drift": 0.01
+    },
+    "model_seconds": 10,
+    "seed": 1,
+    "what": "run_kernel only; network built outside timing; same initial network each repeat"
+  },
+  "repeats": 7,
+  "n_spikes": [
+    46291,
+    46291,
+    46291,
+    46291,
+    46291,
+    46291,
+    46291
+  ],
+  "wall_times_s": [
+    0.12269805999994787,
+    0.11383661999980177,
+    0.11574536500029353,
+    0.11125497999955769,
+    0.11361634099966977,
+    0.11218405999989045,
+    0.11525319400016087
+  ],
+  "min_s": 0.11125497999955769,
+  "median_s": 0.11383661999980177,
+  "realtime_factor_min_wall": 89.88361689552914,
+  "realtime_factor_median_wall": 87.84519427946309,
+  "peak_rss_mb": 179.15234375
+}

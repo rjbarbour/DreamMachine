@@ -1,0 +1,68 @@
+{
+  "benchmark": "spnet-scaling",
+  "git_sha": "1fe8330ea40c159ff896133c0286ce3fbcd3938d",
+  "utc_time": "2026-11-24T01:06:00Z",
+  "cpu_model": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+  "cpu_count": 4,
+  "numba_threads": 4,
+  "python": "3.13.18",
+  "numpy": "2.5.3",
+  "numba": "0.68.1",
+  "parameters": {
+    "sizes": [
+      1000,
+      10000,
+      100000
+    ],
+    "split": "80/20",
+    "M": 100,
+    "D": 20,
+    "seed": 1,
+    "budget_s": 150.0,
+    "max_model_seconds": 20,
+    "what": "each size in its own process; JIT warm-up on a tiny network; 1 s probe then model_seconds chosen to fit budget; single run per size"
+  },
+  "repeats": 1,
+  "results": [
+    {
+      "n": 1000,
+      "model_seconds": 20,
+      "wall_s": 0.15722825599959833,
+      "realtime_factor": 127.20359882419031,
+      "probe_1s_wall_s": 0.044352926000101434,
+      "build_network_s": 0.016865345000041998,
+      "n_spikes": 66347,
+      "mean_rate_hz": 3.31735,
+      "synapses": 100000,
+      "peak_rss_mb": 176.828125,
+      "bytes_per_synapse": 1854.17728
+    },
+    {
+      "n": 10000,
+      "model_seconds": 20,
+      "wall_s": 1.1511703689998285,
+      "realtime_factor": 17.373623000196403,
+      "probe_1s_wall_s": 0.43864755200002037,
+      "build_network_s": 1.093089480999879,
+      "n_spikes": 19874,
+      "mean_rate_hz": 0.09937,
+      "synapses": 1000000,
+      "peak_rss_mb": 328.04296875,
+      "bytes_per_synapse": 343.977984
+    },
+    {
+      "n": 100000,
+      "model_seconds": 20,
+      "wall_s": 13.686449375999928,
+      "realtime_factor": 1.4612993809096528,
+      "probe_1s_wall_s": 6.220561840999835,
+      "build_network_s": 100.78348787799996,
+      "n_spikes": 19975,
+      "mean_rate_hz": 0.0099875,
+      "synapses": 10000000,
+      "peak_rss_mb": 1415.71484375,
+      "bytes_per_synapse": 148.4484608
+    }
+  ],
+  "first_measured_size_below_realtime": null
+}
