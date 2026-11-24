@@ -4,19 +4,25 @@
 
 A biomimetic SNN framework intended for computational neuroscience research, Hebbian learning experiments, and as groundwork for simulating biological neural circuits like *Aplysia californica*.
 
-> **Status: prototype.** The current code runs and is tested, but it does not yet
-> replicate Izhikevich's reference network (no conduction delays, no inhibitory
-> population) and it is not yet fast. See [docs/plan.md](docs/plan.md) for the audit,
-> the revised milestones and the measured baseline. Work is tracked in `backlog/`
+> **Status: early research code.** `dreammachine.spnet` is a replication of
+> Izhikevich's `spnet.m` (800 excitatory and 200 inhibitory neurons, 100 synapses
+> per neuron, 1-20 ms delays, STDP with once-a-second weight updates). A compiled
+> kernel is bit-identical to a plain NumPy transcription and was cross-checked
+> against the original `spnet.m` under Octave
+> ([docs/validation/crosscheck-original.md](docs/validation/crosscheck-original.md));
+> long-run statistics are in
+> [docs/validation/spnet-statistics.md](docs/validation/spnet-statistics.md).
+> The older modules (`neurons`, `plasticity`, `network`) are a legacy prototype and
+> do not implement that model. Nothing for Aplysia exists yet. See
+> [docs/plan.md](docs/plan.md) for the milestones. Work is tracked in `backlog/`
 > ([Backlog.md](https://backlog.md), run `backlog board`).
 
 ## Features
 
-- **Izhikevich Neuron Model**: 2-variable model with seven preset neuron types
-- **STDP Plasticity**: Trace-based pair STDP with weight bounds
-- **Computation**: NumPy, with the neuron update compiled by Numba (the plasticity and simulation loops are still Python)
-- **Sparse Connectivity**: CSR weight matrix
-- **Modular layout**: separate neuron, plasticity and simulator modules
+- **`dreammachine.spnet`**: replication of `spnet.m` with per-synapse conduction delays, an inhibitory population, and STDP through a decaying weight derivative.
+- **Oracle and kernel**: `run_oracle` (slow, obviously correct) and `run_kernel` (Numba) agree spike for spike; see [docs/testing.md](docs/testing.md).
+- **Own random numbers**: networks and inputs come from `numpy.random.Generator`, not MATLAB's stream.
+- **Legacy prototype**: single-population Izhikevich network with pair STDP (`dreammachine.network`), kept for reference only.
 
 ## Installation
 
@@ -32,96 +38,49 @@ pip install -e ".[all]"
 ## Quick Start
 
 ```python
-from dreammachine import (
-    IzhikevichPopulation,
-    NeuronType,
-    NetworkSimulator,
-)
-from dreammachine.network.simulator import create_network
 import numpy as np
+from dreammachine.spnet import SpnetParams, build_network, make_inputs, run_kernel
 
-# Create a 100-neuron network with 10% connectivity
-neurons, synapses, sim = create_network(
-    n_neurons=100,
-    neuron_type=NeuronType.RS,  # Regular Spiking
-    connectivity_density=0.1,
-)
+params = SpnetParams()                      # 800 exc + 200 inh, M=100, D=20
+rng = np.random.default_rng(1)
+net = build_network(params, rng)
+inputs = make_inputs(params, 10, rng)       # 10 s of model time
+res = run_kernel(net, inputs, params)       # first call includes JIT compilation
 
-# Define external input (drive first 20 neurons)
-def external_input(t):
-    I = np.zeros(100, dtype=np.float32)
-    I[:20] = 15.0
-    return I
-
-# Run 1 second simulation
-result = sim.run(1000.0, dt=0.5, I_ext=external_input)
-
-print(f"Total spikes: {result.n_spikes}")
-print(f"Mean firing rate: {result.mean_firing_rate:.1f} Hz")
+print(f"spikes: {res.spike_time.size}")
+print(f"mean weight (exc): {res.s[:params.Ne].mean():.2f}")
 ```
 
-## Neuron Types
+Statistics scripts: `scripts/validate_spnet.py`, benchmarks: `scripts/bench.py`.
 
-| Type | Description | Use Case |
-|------|-------------|----------|
-| RS | Regular Spiking | Excitatory pyramidal neurons |
-| FS | Fast Spiking | Inhibitory interneurons |
-| IB | Intrinsically Bursting | Layer 5 pyramidal |
-| CH | Chattering | Fast rhythmic bursting |
-| LTS | Low-Threshold Spiking | Inhibitory interneurons |
-| TC | Thalamocortical | Thalamic relay neurons |
-| RZ | Resonator | Subthreshold oscillations |
+## Legacy prototype
 
-## STDP Learning
-
-The simulator implements exponential STDP:
-
-```
-Δw = A+ × exp(-Δt/τ+)  if pre fires before post (LTP)
-Δw = A- × exp(Δt/τ-)   if post fires before pre (LTD)
-```
-
-Configure via `STDPParams`:
-
-```python
-from dreammachine import STDPParams
-
-params = STDPParams(
-    tau_plus=20.0,   # LTP time constant (ms)
-    tau_minus=20.0,  # LTD time constant (ms)
-    A_plus=0.01,     # LTP amplitude
-    A_minus=-0.012,  # LTD amplitude
-    w_min=0.0,       # Weight bounds
-    w_max=1.0,
-)
-```
+The `neurons`, `plasticity` and `network` modules (seven neuron presets, pair STDP
+with weight bounds, CSR connectivity, no conduction delays) are the first
+iteration. They are superseded by `dreammachine.spnet` and are described in
+[docs/architecture.md](docs/architecture.md) only as legacy.
 
 ## Performance
 
-Measured on 2026-11-24 in a 4-vCPU cloud container (Intel Xeon 2.1 GHz, 15 GB RAM),
-Python 3.13, Numba 0.68, `dt = 0.5 ms`, no conduction delays:
-
-| Network size | Synapses | Model time | Wall time | Realtime factor |
-|--------------|----------|------------|-----------|-----------------|
-| 1,000 neurons | 100,000 | 1.0 s | 4.4 s | 0.23x |
-
-This is a single unrepeated run, recorded as the baseline to improve on. An earlier
-version of this table contained estimates that had not been measured; they have been
-removed. The performance target and method are in [docs/plan.md](docs/plan.md).
+Reference network (1000 neurons, 100k synapses, delays and STDP), compiled kernel,
+10 s of model time, 7 repeats on a 4-vCPU Xeon 2.1 GHz cloud container:
+**81.5-89.9x realtime** (min-max; record
+`benchmarks/records/bench-spnet-reference-20261124T010156Z.json`). Scaling,
+memory use, the legacy baseline and caveats are in
+[docs/validation/benchmarks.md](docs/validation/benchmarks.md).
 
 ## Project Structure
 
 ```
 DreamMachine/
-├── docs/
-│   ├── spec.md           # Requirements specification
-│   └── architecture.md   # System design
+├── docs/                 # plan, spec, architecture, testing, policies, validation/
 ├── src/dreammachine/
-│   ├── neurons/          # Neuron models
-│   ├── plasticity/       # STDP and learning rules
-│   └── network/          # Simulation engine
+│   ├── spnet/            # spnet.m replication: network, oracle, kernel
+│   └── neurons/ plasticity/ network/   # legacy prototype
+├── scripts/              # bench.py, validate_spnet.py, crosscheck_original.py
+├── benchmarks/records/   # JSON records written by the scripts
 ├── tests/                # pytest test suite
-└── examples/             # Usage examples
+└── examples/             # legacy prototype example
 ```
 
 ## Running Tests
